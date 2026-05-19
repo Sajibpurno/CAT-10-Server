@@ -1,7 +1,7 @@
 const express = require('express')
 const dotenv = require('dotenv')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId  } = require('mongodb');
 dotenv.config()
 
 const uri = process.env.MONGODB_URI;
@@ -28,6 +28,13 @@ async function run() {
     
     app.get('/allCards', async(req, res)=>{
       const result = await AllCatCollection.find().toArray();
+      res.json(result);
+    })
+
+    // get for id wise data get
+    app.get('/allCards/:id', async (req, res)=>{
+      const {id} = req.params;
+      const result = await AllCatCollection.findOne({_id: new ObjectId(id)})
       res.json(result);
     })
 
