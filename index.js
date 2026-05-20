@@ -31,12 +31,22 @@ async function run() {
       res.json(result);
     })
 
+    // get for email wise data get
+    app.get('/myCards', async (req, res) => {
+      const userEmail = req.query.email;
+      console.log(userEmail)
+      const query = { email: userEmail };
+      const result = await AllCatCollection.find(query).toArray();
+      res.json(result);
+    })
+
     // get for id wise data get
     app.get('/allCards/:id', async (req, res)=>{
       const {id} = req.params;
       const result = await AllCatCollection.findOne({_id: new ObjectId(id)})
       res.json(result);
     })
+   
 
     app.post('/allCards', async (req,res)=>{
       const allCardsData =  req.body
