@@ -40,6 +40,13 @@ async function run() {
       res.json(result);
     })
 
+    // delete card data , er jonne api make korchi
+    app.delete('/allCards/:id', async(req, res)=>{
+      const {id} = req.params
+      const result = await AllCatCollection.deleteOne({_id: new ObjectId(id)})
+      res.json(result);
+    })
+
     // get for id wise data get
     app.get('/allCards/:id', async (req, res)=>{
       const {id} = req.params;
