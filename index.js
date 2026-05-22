@@ -24,7 +24,8 @@ async function run() {
   try {
     await client.connect();
     const db = client.db('cat10')
-    const AllCatCollection = db.collection('allCards')
+    const AllCatCollection = db.collection('allCards');
+    const AdoptionCollection = db.collection('adopting')
     
     app.get('/allCards', async(req, res)=>{
       const result = await AllCatCollection.find().toArray();
@@ -47,6 +48,17 @@ async function run() {
       res.json(result);
     })
 
+    // form teke j data get kori seta card ee dka jay oita edit korbo akn patch kore
+    app.patch('/allCards/:id',async (req, res)=>{
+      const {id} = req.params;
+      const updateData = req.body
+      const result = await AllCatCollection.updateOne(
+        {_id: new ObjectId(id)},
+        {$set: updateData}
+      )
+      res.json(result);
+    })
+
     // get for id wise data get
     app.get('/allCards/:id', async (req, res)=>{
       const {id} = req.params;
@@ -54,13 +66,31 @@ async function run() {
       res.json(result);
     })
    
-
     app.post('/allCards', async (req,res)=>{
       const allCardsData =  req.body
       console.log(allCardsData)
       const result = await AllCatCollection.insertOne(allCardsData)
       res.json(result)
     })
+
+    // for adoption form
+    app.post('/adopting', async (req,res)=>{
+      const allAdoptionData =  req.body
+      
+      const result = await AdoptionCollection.insertOne(allAdoptionData) 
+      res.json(result)
+    })
+
+    // get for email wise data get for my resuest showing
+    app.get('/adopting', async (req, res) => {
+      const userEmail = req.query.email;
+      
+      const query = { userEmail: userEmail };
+      const result = await AdoptionCollection.find(query).toArray();
+      res.json(result);
+    })
+
+
 
     
     await client.db("admin").command({ ping: 1 });
