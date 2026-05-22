@@ -2,6 +2,7 @@ const express = require('express')
 const dotenv = require('dotenv')
 const cors = require('cors')
 const { MongoClient, ServerApiVersion, ObjectId  } = require('mongodb');
+const { jwtVerify, createRemoteJWKSet } = require('jose-cjs');
 dotenv.config()
 
 const uri = process.env.MONGODB_URI;
@@ -19,18 +20,77 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+// for verify jwks-
+const JWKS = createRemoteJWKSet(
+  new URL(`${process.env.CLIENT_URL}/api/auth/jwks`)
+)
+
+
+// middleware for server
+const verifyToken = async (req, res, next)=>{
+      const authHeader = req.headers.authorization 
+      //client teke call korce
+      if(!authHeader){
+        return res.status(401).json({ message: "Unauthorized"})
+      }
+      const token = authHeader.split(" ")[1]
+      if (!token) {
+        return res.status(401).json({ message: "Unauthorized"})
+      }
+      console.log(token);
+      
+      // for verify
+      try {
+        const {payload} = await jwtVerify(token,JWKS)
+      console.log(payload);
+           
+        next()
+
+      } catch (error) {
+        return res.status(403).json({ message: "Forbidden"})
+      }
+ 
+      
+    }
+
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
     const db = client.db('cat10')
     const AllCatCollection = db.collection('allCards');
     const AdoptionCollection = db.collection('adopting')
     
-    app.get('/allCards', async(req, res)=>{
-      const result = await AllCatCollection.find().toArray();
-      res.json(result);
+    
+    // allCards GET - search, filter, sort
+    app.get('/allCards', async (req, res) => {
+      try {
+        const { search, species, sort } = req.query;
+        let query = {};
+
+        if (search) {
+          query.petName = { $regex: search, $options: 'i' };
+        }
+
+        // if (species) {
+        //   query.species = { $in: [species] };
+        // }
+        if (species && species.trim() !== '') {
+          const speciesList = species.split(',');
+          query.species = { $in: speciesList };
+        }
+
+        let sortOption = {};
+        if (sort === 'asc') sortOption = { adoptionFee: 1 };
+        else if (sort === 'desc') sortOption = { adoptionFee: -1 };
+
+        const result = await AllCatCollection.find(query).sort(sortOption).toArray();
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({ message: error.message });
+      }               
     })
+
 
     // get for email wise data get
     app.get('/myCards', async (req, res) => {
@@ -60,7 +120,7 @@ async function run() {
     })
 
     // get for id wise data get
-    app.get('/allCards/:id', async (req, res)=>{
+    app.get('/allCards/:id',verifyToken, async (req, res)=>{
       const {id} = req.params;
       const result = await AllCatCollection.findOne({_id: new ObjectId(id)})
       res.json(result);
@@ -72,6 +132,11 @@ async function run() {
       const result = await AllCatCollection.insertOne(allCardsData)
       res.json(result)
     })
+
+    // all card search and filtering
+    
+
+
 
     // for adoption form
     app.post('/adopting', async (req,res)=>{
@@ -93,7 +158,7 @@ async function run() {
 
 
     
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
