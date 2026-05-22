@@ -96,7 +96,7 @@ async function run() {
     app.get('/myCards', async (req, res) => {
       const userEmail = req.query.email;
       console.log(userEmail)
-      const query = { email: userEmail };
+      const query = { ownerEmail: userEmail };
       const result = await AllCatCollection.find(query).toArray();
       res.json(result);
     })
@@ -132,11 +132,6 @@ async function run() {
       const result = await AllCatCollection.insertOne(allCardsData)
       res.json(result)
     })
-
-    // all card search and filtering
-    
-
-
 
     // for adoption form
     app.post('/adopting', async (req,res)=>{
