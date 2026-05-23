@@ -93,7 +93,7 @@ async function run() {
 
 
     // get for email wise data get
-    app.get('/myCards', async (req, res) => {
+    app.get('/myCards', verifyToken, async (req, res) => {
       const userEmail = req.query.email;
       console.log(userEmail)
       const query = { ownerEmail: userEmail };
@@ -102,14 +102,14 @@ async function run() {
     })
 
     // delete card data , er jonne api make korchi
-    app.delete('/allCards/:id', async(req, res)=>{
+    app.delete('/allCards/:id',verifyToken, async(req, res)=>{
       const {id} = req.params
       const result = await AllCatCollection.deleteOne({_id: new ObjectId(id)})
       res.json(result);
     })
 
     // form teke j data get kori seta card ee dka jay oita edit korbo akn patch kore
-    app.patch('/allCards/:id',async (req, res)=>{
+    app.patch('/allCards/:id',verifyToken, async (req, res)=>{
       const {id} = req.params;
       const updateData = req.body
       const result = await AllCatCollection.updateOne(
@@ -125,8 +125,8 @@ async function run() {
       const result = await AllCatCollection.findOne({_id: new ObjectId(id)})
       res.json(result);
     })
-   
-    app.post('/allCards', async (req,res)=>{
+  //  pet add--
+    app.post('/allCards',verifyToken, async (req,res)=>{
       const allCardsData =  req.body
       console.log(allCardsData)
       const result = await AllCatCollection.insertOne(allCardsData)
@@ -142,14 +142,14 @@ async function run() {
     })
 
     // get for email wise data get for my resuest showing
-    app.get('/adopting', async (req, res) => {
+    app.get('/adopting',verifyToken, async (req, res) => {
       const userEmail = req.query.email;
       
       const query = { userEmail: userEmail };
       const result = await AdoptionCollection.find(query).toArray();
       res.json(result);
     })
-    
+
     // GET — specific pet er sob adoption requests (owner dekhbe)
     app.get('/adopting/pet/:petId', async (req, res) => {
     const { petId } = req.params;
