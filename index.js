@@ -149,6 +149,13 @@ async function run() {
       const result = await AdoptionCollection.find(query).toArray();
       res.json(result);
     })
+    
+    // GET — specific pet er sob adoption requests (owner dekhbe)
+    app.get('/adopting/pet/:petId', async (req, res) => {
+    const { petId } = req.params;
+    const result = await AdoptionCollection.find({ petId: petId }).toArray();
+    res.json(result);
+  });
 
     // delete card data adoption req. data
     app.delete('/adopting/:id', async(req, res)=>{
@@ -158,12 +165,6 @@ async function run() {
     })
 
 
-  // ✅ GET — specific pet er sob adoption requests (owner dekhbe)
-app.get('/adopting/pet/:petId', async (req, res) => {
-  const { petId } = req.params;
-  const result = await AdoptionCollection.find({ petId: petId }).toArray();
-  res.json(result);
-});
 
 // ✅ PATCH — request er status update (approved / rejected)
 app.patch('/adopting/:id', async (req, res) => {
