@@ -158,6 +158,25 @@ async function run() {
     })
 
 
+  // ✅ GET — specific pet er sob adoption requests (owner dekhbe)
+app.get('/adopting/pet/:petId', async (req, res) => {
+  const { petId } = req.params;
+  const result = await AdoptionCollection.find({ petId: petId }).toArray();
+  res.json(result);
+});
+
+// ✅ PATCH — request er status update (approved / rejected)
+app.patch('/adopting/:id', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const result = await AdoptionCollection.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { status: status } }
+  );
+  res.json(result);
+});
+
+
 
     
     // await client.db("admin").command({ ping: 1 });
