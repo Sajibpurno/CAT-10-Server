@@ -150,6 +150,13 @@ async function run() {
       res.json(result);
     })
 
+    // delete card data adoption req. data
+    app.delete('/adopting/:id', async(req, res)=>{
+      const {id} = req.params
+      const result = await AdoptionCollection.deleteOne({_id: new ObjectId(id)})
+      res.json(result);
+    })
+
 
 
     
